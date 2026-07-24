@@ -1,0 +1,49 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "properties": {
+                "feature_key": "SAMPLE-001",
+                "name": "サンプル図書館",
+                "address": "東京都千代田区丸の内1-1-1",
+                "phone": "03-0000-0001",
+                "website": "https://example.com/sample-library"
+            },
+            "geometry": { "type": "Point", "coordinates": [139.7671, 35.6812] }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "feature_key": "SAMPLE-002",
+                "name": "サンプル公園",
+                "address": "大阪府大阪市北区梅田1-1-1",
+                "phone": "06-0000-0002",
+                "website": "https://example.com/sample-park"
+            },
+            "geometry": { "type": "Point", "coordinates": [135.4959, 34.7025] }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "feature_key": "SAMPLE-003",
+                "name": "サンプル体育館",
+                "address": "愛知県名古屋市中区栄1-1-1",
+                "phone": "052-000-0003",
+                "website": "https://example.com/sample-gym"
+            },
+            "geometry": { "type": "Point", "coordinates": [136.9066, 35.1681] }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "feature_key": "SAMPLE-004",
+                "name": "サンプル資料館",
+                "address": "福岡県福岡市博多区博多駅前1-1-1",
+                "phone": "092-000-0004",
+                "website": "https://example.com/sample-museum"
+            },
+            "geometry": { "type": "Point", "coordinates": [130.4207, 33.5904] }
+        }
+    ]
+}
