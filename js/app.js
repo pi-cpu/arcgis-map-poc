@@ -62,7 +62,9 @@
             function (esriConfig, EsriMap, MapView, FeatureLayer) {
                 esriConfig.apiKey = apiKey;
 
-                featureLayer = new FeatureLayer({ url: layerUrl });
+                // outFieldsを指定しないと、hitTestで返るgraphicに描画に必要な項目しか
+                // 含まれず、feature_key/name/address/phone/website を読み取れない。
+                featureLayer = new FeatureLayer({ url: layerUrl, outFields: ['*'] });
                 featureLayer.load().catch(function (err) {
                     sendError('LAYER_UNAVAILABLE');
                     // 一時的な切り分け用: ArcGIS側の失敗理由をiframe内にだけ表示する。
@@ -130,6 +132,9 @@
         };
         if (!validation.isValidFeatureAttributes(feature)) {
             sendError('UNKNOWN');
+            // 一時的な切り分け用: レイヤーの実際の項目名をiframe内にだけ表示する。
+            // サンプルデータの項目名のみで、機密情報は含まない。原因特定後に元へ戻すこと。
+            setStatus('地点情報を読み取れませんでした。[診断] keys=' + Object.keys(attrs).join(','));
             return;
         }
         postToParent(validation.buildFeatureSelectedMessage(sessionNonce, feature));
