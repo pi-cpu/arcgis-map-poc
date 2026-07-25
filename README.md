@@ -27,16 +27,26 @@ tests/validation.test.js  検証ロジックの単体テスト(Node標準テス�
 
 1. ArcGIS Online にサインインし、Content > Add Item > Add from file から `sample-data/sample-locations.geojson` をアップロードする。
 2. インポート時にPoint型のHosted Feature Layerとして公開する。
-3. レイヤーに `feature_key`(一意)、`name`、`address`、`phone`、`website` の各フィールドが存在することを確認する。
-4. 公開後、レイヤーのFeatureServer URL(例: `https://services.arcgis.com/xxxx/arcgis/rest/services/sample-locations/FeatureServer/0`)を控える。
+3. GeoJSONからは「Feature layer (ホスト)」として公開する。GeoJSONアイテムのままではFeatureServer URLが得られない。
+4. レイヤーに `feature_key`(一意)、`name`、`address`、`phone`、`website` の各フィールドが存在することを確認する。
+5. 公開後、レイヤーのFeatureServer URL(例: `https://services1.arcgis.com/xxxx/arcgis/rest/services/sample_locations/FeatureServer/0`)を控える。末尾のレイヤー番号まで含める。
+6. `js/app.js` は `FeatureLayer` に `outFields: ['*']` を指定している。これを省くと `hitTest` が返すグラフィックに描画用の項目しか含まれず、`feature_key` などを読み取れない。
 
 ### 3. APIキーの作成・制限
 
-1. ArcGIS Location Platform の API Keys 画面で新規APIキーを作成する。
-2. **従量課金(Premium content / pay-as-you-go)は有効化しない。** 無料枠のみで運用する。
-3. 許可リファラー(Referrer restrictions)に GitHub Pages の公開URL(例: `https://<github-user>.github.io/arcgis-map-poc/`)のみを設定する。
-4. 権限(Privileges)は、必要な基本地図表示とHosted Feature Layerへのアクセスのみに限定する。
-5. 発行されたAPIキーはこのリポジトリへコミットせず、Salesforce側の `ArcGIS_PoC_Settings__c` カスタム設定にのみ登録する。
+従来のAPIキー(legacy API keys)は2026-06-27に廃止されており、現在は **API key credentials** を作成する。
+
+1. ArcGIS Location Platform の API keys 画面で、種別 **Public application** の API key credential を新規作成する。
+2. **従量課金(Premium content / pay-as-you-go)は有効化しない。** 無料枠のみで運用する。支払い方法を登録しなければ、枠超過時はサービスが停止する。
+3. Item access に、手順2で作成したHosted Feature Layerを追加する(1キーあたり最大100アイテム)。
+4. Privileges は、基本地図表示(Basemaps)とFeature Serviceの参照のみに限定する。編集権限は付与しない。
+5. Referrer URLs に GitHub Pages のオリジン(例: `https://<github-user>.github.io`)を設定する。`https://` スキームは必須で、パスの指定は推奨されない。
+6. **トークンの生成は最後に行う。** 発行されるトークンにはその時点のitem accessが埋め込まれるため、item accessやprivilegeを変更したら必ず再生成する。
+7. 発行されたトークンはこのリポジトリへコミットせず、Salesforce側の `ArcGIS_PoC_Settings__c` カスタム設定にのみ登録する。
+
+> トークンは300文字を超える(実測305文字)。Salesforceのカスタム設定のテキスト項目は255文字が上限のため、`API_Key__c` と `API_Key_Part2__c` に分割して登録する。詳細は `arcgis-experience-poc/README.md` を参照。
+>
+> なお、リファラー制限付きのトークンはブラウザのアドレスバーから直接叩くと必ず `498 Invalid token` を返す。これはキーの不正を意味しないため、疎通確認の材料にはならない。
 
 ### 4. このリポジトリの設定
 
@@ -57,7 +67,7 @@ Salesforce側の詳細手順は `arcgis-experience-poc/README.md` を参照。�
 
 | 項目 | 設定先 | 値の例 |
 | --- | --- | --- |
-| API_Key__c | ArcGIS_PoC_Settings__c | 手順3で発行したAPIキー |
+| API_Key__c / API_Key_Part2__c | ArcGIS_PoC_Settings__c | 手順3で発行したトークンを255文字で分割した前半／後半 |
 | Layer_URL__c | ArcGIS_PoC_Settings__c | 手順2で控えたFeatureServer URL |
 | Map_App_URL__c | ArcGIS_PoC_Settings__c | 手順5で公開したGitHub Pages URL |
 | Allowed_Map_Origin__c | ArcGIS_PoC_Settings__c | GitHub Pagesのオリジン(例: `https://<github-user>.github.io`) |
@@ -89,6 +99,8 @@ ArcGIS Maps SDKを用いた実際の初期化・レイヤー表示・地点選�
 - [ ] 許可されていない親オリジン: 許可リストにないオリジンからのメッセージを無視する
 - [ ] 無効なnonce: 空文字・型不正・過剰に長いnonceを含む設定メッセージを拒否する
 
+いずれもLWR側のiframeに `sandbox` 属性を付けずに確認する。`sandbox` を付けるとプラットフォームが `allow-same-origin` を除去し、iframeが不透明オリジンとなって `event.origin` が `"null"` になるため、オリジン完全一致検証もArcGISのリファラー制限も構造的に通過できない。
+
 ## 障害時の確認手順
 
 | 事象 | 確認手順 |
@@ -98,6 +110,8 @@ ArcGIS Maps SDKを用いた実際の初期化・レイヤー表示・地点選�
 | ArcGIS無料枠停止(従量課金未達で停止) | ArcGIS Location Platform のUsage画面でクレジット残量を確認する。従量課金は有効化しない方針のため、枠超過時はサービスが停止する想定。 |
 | Feature Layer停止 | `featureLayer.load()` の失敗で `LAYER_UNAVAILABLE` を通知する。ArcGIS OnlineでレイヤーのShare設定・削除有無を確認する。 |
 | CSP不備 | ブラウザのDevToolsコンソールでCSP違反ログを確認する。SalesforceのTrusted URL設定(frame-src)を確認する。 |
+| 地点をクリックしても項目を読み取れない(`UNKNOWN`) | `FeatureLayer` の `outFields` 指定を確認する。未指定だと `hitTest` のグラフィックに属性が含まれない。 |
+| 地図は出るがレイヤーだけ出ない(`LAYER_UNAVAILABLE`) | APIキーのitem accessにレイヤーが含まれているか、トークンがitem access変更後に再生成されているか、Salesforce側でトークンが255文字で切れていないかを順に確認する。 |
 
 ## 対象外
 

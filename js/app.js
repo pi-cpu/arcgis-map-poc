@@ -65,12 +65,9 @@
                 // outFieldsを指定しないと、hitTestで返るgraphicに描画に必要な項目しか
                 // 含まれず、feature_key/name/address/phone/website を読み取れない。
                 featureLayer = new FeatureLayer({ url: layerUrl, outFields: ['*'] });
-                featureLayer.load().catch(function (err) {
+                featureLayer.load().catch(function () {
                     sendError('LAYER_UNAVAILABLE');
-                    // 一時的な切り分け用: ArcGIS側の失敗理由をiframe内にだけ表示する。
-                    // 親へは非機密のエラーコードのみを送る方針は変えない。原因特定後に元へ戻すこと。
-                    var detail = err && (err.name || '') + ' ' + (err.message || '');
-                    setStatus('地図データを読み込めませんでした。[診断] ' + detail);
+                    setStatus('地図データを読み込めませんでした。');
                 });
 
                 var map = new EsriMap({
@@ -132,9 +129,7 @@
         };
         if (!validation.isValidFeatureAttributes(feature)) {
             sendError('UNKNOWN');
-            // 一時的な切り分け用: レイヤーの実際の項目名をiframe内にだけ表示する。
-            // サンプルデータの項目名のみで、機密情報は含まない。原因特定後に元へ戻すこと。
-            setStatus('地点情報を読み取れませんでした。[診断] keys=' + Object.keys(attrs).join(','));
+            setStatus('地点情報を読み取れませんでした。');
             return;
         }
         postToParent(validation.buildFeatureSelectedMessage(sessionNonce, feature));
