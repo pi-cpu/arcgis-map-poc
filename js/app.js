@@ -62,9 +62,8 @@
             function (esriConfig, EsriMap, MapView, FeatureLayer) {
                 esriConfig.apiKey = apiKey;
 
-                // outFieldsを指定しないと、hitTestで返るgraphicに描画に必要な項目しか
-                // 含まれず、feature_key/name/address/phone/website を読み取れない。
-                featureLayer = new FeatureLayer({ url: layerUrl, outFields: ['*'] });
+                // hitTestで地点登録に必要な属性だけを返す。
+                featureLayer = new FeatureLayer({ url: layerUrl, outFields: validation.FEATURE_OUT_FIELDS });
                 featureLayer.load().catch(function () {
                     sendError('LAYER_UNAVAILABLE');
                     setStatus('地図データを読み込めませんでした。');

@@ -22,6 +22,10 @@ const VALID_FEATURE = {
     longitude: 139.7671
 };
 
+test('FeatureLayerで取得する属性を連携契約の5項目だけに限定する', () => {
+    assert.deepEqual(validation.FEATURE_OUT_FIELDS, ['feature_key', 'name', 'address', 'phone', 'website']);
+});
+
 test('isAllowedOrigin: 許可された親オリジンのみtrueを返す', () => {
     assert.equal(validation.isAllowedOrigin('https://example.my.site.com', ALLOWED_ORIGINS), true);
     assert.equal(validation.isAllowedOrigin('https://evil.example', ALLOWED_ORIGINS), false);

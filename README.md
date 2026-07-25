@@ -30,7 +30,8 @@ tests/validation.test.js  検証ロジックの単体テスト(Node標準テス�
 3. GeoJSONからは「Feature layer (ホスト)」として公開する。GeoJSONアイテムのままではFeatureServer URLが得られない。
 4. レイヤーに `feature_key`(一意)、`name`、`address`、`phone`、`website` の各フィールドが存在することを確認する。
 5. 公開後、レイヤーのFeatureServer URL(例: `https://services1.arcgis.com/xxxx/arcgis/rest/services/sample_locations/FeatureServer/0`)を控える。末尾のレイヤー番号まで含める。
-6. `js/app.js` は `FeatureLayer` に `outFields: ['*']` を指定している。これを省くと `hitTest` が返すグラフィックに描画用の項目しか含まれず、`feature_key` などを読み取れない。
+6. レイヤーの共有範囲は所有者のみ（非公開）にし、組織全体または全員へ共有しない。地図アプリからの参照はAPIキーのItem accessだけで許可する。
+7. `js/app.js` は `FeatureLayer` の `outFields` を `feature_key` / `name` / `address` / `phone` / `website` の5項目に限定している。これを省くと `hitTest` が返すグラフィックに描画用の項目しか含まれず、地点属性を読み取れない。
 
 ### 3. APIキーの作成・制限
 

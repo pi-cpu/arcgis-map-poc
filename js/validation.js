@@ -8,6 +8,7 @@
     'use strict';
 
     var MESSAGE_VERSION = 1;
+    var FEATURE_OUT_FIELDS = ['feature_key', 'name', 'address', 'phone', 'website'];
     var MAX_TEXT_LENGTH = 255;
     var MAX_KEY_LENGTH = 100;
     var MAX_API_KEY_LENGTH = 512;
@@ -97,6 +98,7 @@
 
     return {
         MESSAGE_VERSION: MESSAGE_VERSION,
+        FEATURE_OUT_FIELDS: FEATURE_OUT_FIELDS,
         isAllowedOrigin: isAllowedOrigin,
         isValidConfigMessage: isValidConfigMessage,
         isValidFeatureAttributes: isValidFeatureAttributes,
