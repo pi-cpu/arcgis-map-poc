@@ -63,9 +63,12 @@
                 esriConfig.apiKey = apiKey;
 
                 featureLayer = new FeatureLayer({ url: layerUrl });
-                featureLayer.load().catch(function () {
+                featureLayer.load().catch(function (err) {
                     sendError('LAYER_UNAVAILABLE');
-                    setStatus('地図データを読み込めませんでした。');
+                    // 一時的な切り分け用: ArcGIS側の失敗理由をiframe内にだけ表示する。
+                    // 親へは非機密のエラーコードのみを送る方針は変えない。原因特定後に元へ戻すこと。
+                    var detail = err && (err.name || '') + ' ' + (err.message || '');
+                    setStatus('地図データを読み込めませんでした。[診断] ' + detail);
                 });
 
                 var map = new EsriMap({
